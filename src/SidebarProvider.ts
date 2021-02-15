@@ -52,6 +52,9 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     const styleVSCodeUri = webview.asWebviewUri(
       vscode.Uri.joinPath(this._extensionUri, "media", "vscode.css")
     );
+    const styleGlobalUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(this._extensionUri, "media", "global.css")
+    );
     const scriptUri = webview.asWebviewUri(
       vscode.Uri.joinPath(this._extensionUri, "out", "compiled/sidebar.js")
     );
@@ -74,8 +77,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="${styleResetUri}" rel="stylesheet">
         <link href="${styleVSCodeUri}" rel="stylesheet">
+        <link href="${styleGlobalUri}" rel="stylesheet">
         <link href="${styleMainUri}" rel="stylesheet">
         <script nonce="${nonce}">
+          const tsvscode = acquireVsCodeApi();
         </script>
       </head>
       <body>
