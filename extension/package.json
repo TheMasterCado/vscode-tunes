@@ -10,7 +10,7 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:vscode-tunes.helloWorld",
+		"onCommand:vscode-tunes.authenticate",
 		"onView:vscode-tunes-sidebar"
 	],
 	"main": "./dist/extension.js",
@@ -37,8 +37,9 @@
 		},
 		"commands": [
 			{
-				"command": "vscode-tunes.helloWorld",
-				"title": "Hello World"
+				"command": "vscode-tunes.authenticate",
+				"category": "VSCode tunes",
+				"title": "Authenticate"
 			}
 		]
 	},
