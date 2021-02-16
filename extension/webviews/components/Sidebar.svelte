@@ -1,27 +1,53 @@
-<div class="sidebar-container">
-  <ul class="no-bullets">
-    {#each users as user (user.uuid)}
-      <li class="user">
-        <p class="user-name">{user.name}</p> <div class="song-info-wrapper"><p class="song-info">{user.currentlyListening}</p></div>
-      </li>
-    {/each}
-  </ul>
-</div>
-
 <script lang="ts">
-import { onMount } from "svelte";
+  import { onMount } from "svelte";
+  let users: any[] = [];
+  let currentUser: any = null;
+  let loading = true;
 
+  onMount(async () => {
+    const response = await fetch(`${apiBaseUrl}/me`, {
+      headers: {
+        authorization: `Bearer ${accessToken}`,
+      },
+    });
+    if (response.status === 200) {
+      const data = await response.json();
+      currentUser = data.user;
+      users.push(currentUser);
+    }
+    loading = false;
 
-  let users = [
-    {uuid: '1', name: 'Alexis Cadorette', currentlyListening: 'Very long song name by a very long author name that played the song and sang it'}
-  ]
-
-  onMount(() => {
     window.addEventListener("message", (event) => {
+      console.log(event.data);
       const message = event.data;
+      switch (message.type) {
+        case "currentUserCurrentlyPlaying":
+          currentUser.currentlyPlaying = message.value;
+          users = [...users];
+          break;
+      }
     });
   });
 </script>
+
+{#if loading}
+  <div>Loading...</div>
+{:else if currentUser}
+  <div class="sidebar-container">
+    <ul class="no-bullets">
+      {#each users as user (user.uuid)}
+        <li class="user">
+          <p class="user-name">{user.name}</p>
+          <div class="song-info-wrapper">
+            <p class="song-info">{user.currentlyPlaying || "Nothing"}</p>
+          </div>
+        </li>
+      {/each}
+    </ul>
+  </div>
+{:else}
+  <div>Please log in to use VSCode tunes.</div>
+{/if}
 
 <style>
   .sidebar-container {
@@ -55,11 +81,15 @@ import { onMount } from "svelte";
   }
   .song-info {
     color: green;
-    animation: move 5s linear infinite
+    animation: move 5s linear infinite;
   }
 
   @keyframes move {
-    from { transform: translateX(100%); }
-    to { transform: translateX(-100%); }
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(-100%);
+    }
   }
 </style>
