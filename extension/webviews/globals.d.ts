@@ -7,5 +7,4 @@ declare global {
     setState: (state: any) => void;
   };
   const apiBaseUrl: string;
-  const accessToken: string;
 }

@@ -12,6 +12,7 @@ import cors from "cors";
 import querystring from "querystring";
 import { v4 as uuid } from "uuid";
 import axios from "axios";
+import { validateAuthorizationHeader } from "./helpers";
 
 const main = async () => {
   // connect to db
@@ -74,33 +75,41 @@ const main = async () => {
 
   app.get("/me", async (req, res) => {
     const authHeader = req.headers.authorization;
-    if (!authHeader) {
+    const user = await validateAuthorizationHeader(authHeader);
+    if (!user) {
       res.sendStatus(401);
       return;
     }
 
-    const token = authHeader.split(" ")[1];
-    if (!token) {
-      res.sendStatus(401);
-      return;
-    }
-
-    let userUuid;
-    try {
-      const payload: any = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-      userUuid = payload.userUuid;
-    } catch (err) {
-      res.sendStatus(401);
-      return;
-    }
-
-    if (!userUuid) {
-      res.sendStatus(401);
-      return;
-    }
-
-    const user = await User.findOne({ where: { uuid: userUuid } });
     res.send({ user });
+  });
+  app.patch("/me", async (req, res) => {
+    const authHeader = req.headers.authorization;
+    const user = await validateAuthorizationHeader(authHeader);
+    if (!user) {
+      res.sendStatus(401);
+      return;
+    }
+
+    const currentlyPlaying = req.body.currently_playing;
+    if (currentlyPlaying !== undefined) {
+      user.currentlyPlayingName = currentlyPlaying.name;
+      user.currentlyPlayingUri = currentlyPlaying.uri;
+      await user.save();
+    }
+
+    res.send({ user });
+  });
+  app.get("/users", async (req, res) => {
+    const authHeader = req.headers.authorization;
+    const user = await validateAuthorizationHeader(authHeader);
+    if (!user) {
+      res.sendStatus(401);
+      return;
+    }
+
+    const users = await User.find();
+    res.send({ users });
   });
   app.get(
     "/auth/spotify",
@@ -109,6 +118,7 @@ const main = async () => {
         "user-read-email",
         "user-read-private",
         "user-read-currently-playing",
+        "user-modify-playback-state",
       ],
       session: false,
     })

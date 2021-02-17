@@ -30,15 +30,21 @@ export function activate(context: vscode.ExtensionContext) {
     })
   );
 
+  let currentlyPlaying: any;
   const intervalId = setInterval(async () => {
     try {
-      const currentlyPlaying = await getCurrentlyPlaying();
-      sidebarProvider._view?.webview.postMessage({
-        type: "currentUserCurrentlyPlaying",
-        value: currentlyPlaying,
-      });
-      // await updateCurrentlyPlaying(currentlyPlaying);
-      output.appendLine(`Current user is now listening to ${currentlyPlaying}`);
+      const newCurrentlyPlaying = await getCurrentlyPlaying();
+      if (currentlyPlaying?.uri !== newCurrentlyPlaying?.uri) {
+        currentlyPlaying = newCurrentlyPlaying;
+        sidebarProvider._view?.webview.postMessage({
+          type: "currentUserCurrentlyPlaying",
+          value: currentlyPlaying,
+        });
+        await updateCurrentlyPlaying(currentlyPlaying);
+        output.appendLine(
+          `Current user is now listening to ${currentlyPlaying.name}`
+        );
+      }
     } catch (err) {
       vscode.window.showErrorMessage(err.message);
     }
