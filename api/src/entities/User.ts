@@ -11,6 +11,12 @@ export class User extends BaseEntity {
   @Column("varchar")
   name: string;
 
+  @Column("varchar")
+  currentlyPlayingName: string;
+
+  @Column("varchar")
+  currentlyPlayingUri: string;
+
   @Column("varchar", { unique: true })
   spotifyId: string;
 }
