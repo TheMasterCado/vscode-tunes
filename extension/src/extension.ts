@@ -32,8 +32,16 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(statusBarItem);
 
   context.subscriptions.push(
-    vscode.commands.registerCommand("vscode-tunes.authenticate", () => {
-      authenticate();
+    vscode.commands.registerCommand("vscode-tunes.authenticate", async () => {
+      await authenticate();
+      await sidebarProvider.sendAccessTokenToView();
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("vscode-tunes.reset", async () => {
+      await ExtensionState.reset();
+      await sidebarProvider.sendAccessTokenToView();
     })
   );
 
@@ -50,23 +58,27 @@ export function activate(context: vscode.ExtensionContext) {
   let currentlyPlaying: any;
   const intervalId = setInterval(async () => {
     try {
-      const newCurrentlyPlaying = await getCurrentlyPlaying();
-      if (currentlyPlaying?.uri !== newCurrentlyPlaying?.uri) {
-        currentlyPlaying = newCurrentlyPlaying;
-        updateStatusBarItem(currentlyPlaying);
-        sidebarProvider._view?.webview.postMessage({
-          type: "currentUserCurrentlyPlaying",
-          value: currentlyPlaying,
-        });
-        await updateCurrentlyPlaying(currentlyPlaying);
-        output.appendLine(
-          `Current user is now listening to ${currentlyPlaying.name}`
-        );
+      if (ExtensionState.getAccessToken()) {
+        const newCurrentlyPlaying = await getCurrentlyPlaying();
+        if (currentlyPlaying?.uri !== newCurrentlyPlaying?.uri) {
+          currentlyPlaying = newCurrentlyPlaying;
+          updateStatusBarItem(currentlyPlaying);
+          sidebarProvider._view?.webview.postMessage({
+            type: "currentUserCurrentlyPlaying",
+            value: currentlyPlaying,
+          });
+          await updateCurrentlyPlaying(currentlyPlaying);
+          output.appendLine(
+            `Current user is now listening to ${currentlyPlaying.name}`
+          );
+        }
       }
     } catch (err) {
       vscode.window.showErrorMessage(err.message);
+      await ExtensionState.reset();
+      await sidebarProvider.sendAccessTokenToView();
     }
-  }, 5 * 1000); // every 30s
+  }, 10 * 1000); // every 10s
 }
 
 function updateStatusBarItem(currentlyPlaying: any) {

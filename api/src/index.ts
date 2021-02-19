@@ -2,7 +2,7 @@ import "reflect-metadata";
 require("dotenv-safe").config();
 import express from "express";
 import { join } from "path";
-import { createConnection } from "typeorm";
+import { createConnection, getRepository } from "typeorm";
 import { __prod__ } from "./constants";
 import passport from "passport";
 import { Strategy as SpotifyStrategy } from "passport-spotify";
@@ -13,6 +13,8 @@ import querystring from "querystring";
 import { v4 as uuid } from "uuid";
 import axios from "axios";
 import { validateAuthorizationHeader } from "./helpers";
+import { Follower } from "./entities/Follower";
+import { runSeed } from "./seed";
 
 const main = async () => {
   // connect to db
@@ -27,7 +29,7 @@ const main = async () => {
     logging: !__prod__,
     synchronize: !__prod__,
   });
-
+  // await runSeed();
   const app = express();
   passport.serializeUser((user: any, done) => {
     done(null, user.accessToken);
@@ -93,12 +95,68 @@ const main = async () => {
 
     const currentlyPlaying = req.body.currently_playing;
     if (currentlyPlaying !== undefined) {
-      user.currentlyPlayingName = currentlyPlaying.name;
-      user.currentlyPlayingUri = currentlyPlaying.uri;
+      user.currentlyPlayingName = currentlyPlaying?.name;
+      user.currentlyPlayingUri = currentlyPlaying?.uri;
+      user.currentlyPlayingAt = new Date();
       await user.save();
     }
 
     res.send({ user });
+  });
+  app.put("/me/followed", async (req, res) => {
+    const authHeader = req.headers.authorization;
+    const user = await validateAuthorizationHeader(authHeader);
+    if (!user) {
+      res.sendStatus(401);
+      return;
+    }
+
+    const userUuid = req.body.user_uuid;
+    console.log("ss", req.body);
+    if (!userUuid) {
+      res.sendStatus(422);
+      return;
+    }
+    const followed = await User.findOne({ where: { uuid: userUuid } });
+    if (!followed) {
+      res.sendStatus(422);
+      return;
+    }
+
+    await Follower.create({
+      user: user,
+      followed: followed,
+      followedAt: new Date(),
+    }).save();
+
+    res.send({ followed });
+  });
+  app.delete("/me/followed/:userUuid", async (req, res) => {
+    const authHeader = req.headers.authorization;
+    const user = await validateAuthorizationHeader(authHeader);
+    if (!user) {
+      res.sendStatus(401);
+      return;
+    }
+
+    const userUuid = req.params.userUuid;
+    if (!userUuid) {
+      res.sendStatus(404);
+      return;
+    }
+    const followerInstance = await getRepository(Follower)
+      .createQueryBuilder("follower")
+      .innerJoinAndSelect("follower.followed", "followed")
+      .where("followed.uuid = :uuid", { uuid: userUuid })
+      .getOne();
+    if (!followerInstance) {
+      res.sendStatus(404);
+      return;
+    }
+
+    await followerInstance.remove();
+
+    res.send({ followed: followerInstance.followed });
   });
   app.get("/users", async (req, res) => {
     const authHeader = req.headers.authorization;
@@ -108,7 +166,31 @@ const main = async () => {
       return;
     }
 
-    const users = await User.find();
+    const view = req.query.view || "everyone";
+    const limit = req.query.limit || 200;
+    const offset = req.query.offset || 0;
+
+    let users;
+    switch (view) {
+      case "everyone":
+        users = await User.find({
+          order: { currentlyPlayingAt: "DESC" },
+          take: +limit,
+          skip: +offset,
+        });
+        break;
+      case "followed":
+        users = (
+          await getRepository(Follower)
+            .createQueryBuilder("follower")
+            .innerJoinAndSelect("follower.followed", "followed")
+            .orderBy("followed.currentlyPlayingAt", "DESC")
+            .take(+limit)
+            .skip(+offset)
+            .getMany()
+        ).map((f) => ({ ...f.followed, followed: true }));
+        break;
+    }
     res.send({ users });
   });
   app.get(

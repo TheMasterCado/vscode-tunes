@@ -38,7 +38,11 @@ export const getCurrentlyPlaying = async () => {
 export const startPlayingUri = async (uri: string) => {
   const spotifyApi = await getSpotifyApi();
 
-  await spotifyApi.play({ uris: [uri] });
+  try {
+    await spotifyApi.play({ uris: [uri] });
+  } catch (err) {
+    throw new SpotifyError("Cannot play this, maybe it's not a real track");
+  }
 };
 
 export const togglePlayback = async () => {
@@ -53,3 +57,5 @@ export const togglePlayback = async () => {
   playback.body.is_playing = !playback.body.is_playing;
   return formatCurrentlyPlaying(playback.body);
 };
+
+export class SpotifyError extends Error {}

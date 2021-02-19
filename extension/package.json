@@ -57,6 +57,11 @@
 				"title": "Authenticate"
 			},
 			{
+				"command": "vscode-tunes.reset",
+				"category": "VSCode tunes",
+				"title": "Reset"
+			},
+			{
 				"command": "vscode-tunes.toggle-playback",
 				"category": "VSCode tunes",
 				"title": "Toggle playback"

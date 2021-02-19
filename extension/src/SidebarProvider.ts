@@ -25,10 +25,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     webviewView.webview.onDidReceiveMessage(async (data) => {
       switch (data.type) {
         case "getAccessToken": {
-          webviewView.webview.postMessage({
-            type: "token",
-            value: await ExtensionState.getAccessToken(),
-          });
+          this.sendAccessTokenToView();
+          break;
+        }
+        case "authenticate": {
+          vscode.commands.executeCommand("vscode-tunes.authenticate");
           break;
         }
         case "playSong": {
@@ -40,6 +41,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           } catch (err) {
             vscode.window.showErrorMessage(err.message);
           }
+          break;
         }
         case "onInfo": {
           if (!data.value) {
@@ -56,6 +58,13 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           break;
         }
       }
+    });
+  }
+
+  public async sendAccessTokenToView() {
+    this._view?.webview.postMessage({
+      type: "token",
+      value: await ExtensionState.getAccessToken(),
     });
   }
 

@@ -8,7 +8,7 @@ export class ExtensionState {
 
   // We don't store this access token because it is short lived
   // and we always get another one using the refresh token
-  private static spotifyAccessToken: string;
+  private static spotifyAccessToken: string | undefined;
 
   static setAccessToken(token: string) {
     return this.state.update(ACCESS_TOKEN_KEY, token);
@@ -29,5 +29,11 @@ export class ExtensionState {
 
   static getSpotifyAccessToken(): string | undefined {
     return this.spotifyAccessToken;
+  }
+
+  static async reset() {
+    this.spotifyAccessToken = undefined;
+    await this.state.update(SPOTIFY_REFRESH_TOKEN_KEY, undefined);
+    await this.state.update(ACCESS_TOKEN_KEY, undefined);
   }
 }

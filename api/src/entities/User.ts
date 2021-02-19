@@ -1,4 +1,11 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from "typeorm";
+import { Follower } from "./Follower";
 
 @Entity()
 export class User extends BaseEntity {
@@ -11,12 +18,21 @@ export class User extends BaseEntity {
   @Column("varchar")
   name: string;
 
-  @Column("varchar")
+  @Column("varchar", { nullable: true })
   currentlyPlayingName: string;
 
-  @Column("varchar")
+  @Column("varchar", { nullable: true })
   currentlyPlayingUri: string;
+
+  @Column("datetime", { nullable: true })
+  currentlyPlayingAt: Date;
 
   @Column("varchar", { unique: true })
   spotifyId: string;
+
+  @OneToMany((type) => Follower, (follower) => follower.user)
+  following: User;
+
+  @OneToMany((type) => Follower, (user) => user.followed)
+  followers: User;
 }

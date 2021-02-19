@@ -3,6 +3,9 @@
   import { debounce } from "lodash-es";
   import ViewSelector from "./ViewSelector.svelte";
   import Spinner from "./Spinner.svelte";
+  import UsersList from "./UsersList.svelte";
+  import { ApiService } from "../ApiService";
+  let apiService: ApiService;
   let users: any[] = [];
   let currentUser: any = null;
   let accessToken = "";
@@ -11,8 +14,8 @@
   let viewReady = false;
   let listLoading = true;
 
-  const playSong = (song: any) => {
-    tsvscode.postMessage({ type: "playSong", value: song });
+  const authenticate = (provider: string) => {
+    tsvscode.postMessage({ type: "authenticate", value: provider });
   };
 
   const search = debounce((_e: any) => {
@@ -27,20 +30,27 @@
     loadUsers();
   };
 
+  const follow = (event: CustomEvent) => {
+    const user = event.detail;
+    user.followed = true;
+    if (currentView === "followed") {
+      users = [...users, user];
+    }
+  };
+
+  const unfollow = (event: CustomEvent) => {
+    const user = event.detail;
+    user.followed = false;
+    if (currentView === "followed") {
+      users = users.filter((u: any) => u.uuid !== user.uuid);
+    }
+  };
+
   const loadUsers = async () => {
     listLoading = true;
-    const responseList = await fetch(
-      `${apiBaseUrl}/users?view=${currentView}&limit=50&offset=${users.length}`,
-      {
-        headers: {
-          authorization: `Bearer ${accessToken}`,
-        },
-      }
+    users = (await apiService.getUsers(currentView)).filter(
+      (u: any) => u.uuid !== currentUser.uuid
     );
-    if (responseList.status === 200) {
-      const data = await responseList.json();
-      users = data.users.filter((u: any) => u.uuid !== currentUser.uuid);
-    }
     listLoading = false;
   };
 
@@ -50,17 +60,23 @@
       switch (message.type) {
         case "token": {
           accessToken = message.value;
-          const response = await fetch(`${apiBaseUrl}/me`, {
-            headers: {
-              authorization: `Bearer ${accessToken}`,
-            },
-          });
-          if (response.status === 200) {
-            const data = await response.json();
-            currentUser = data.user;
+          if (apiService) {
+            apiService.accessToken = accessToken;
+          } else {
+            apiService = new ApiService(accessToken);
           }
-          if (currentUser) {
-            await loadUsers();
+          // if no token log out
+          if (!accessToken) {
+            currentUser = null;
+            users = [];
+            viewReady = true;
+            return;
+          }
+
+          currentUser = await apiService.getMe();
+
+          if (currentUser && users.length === 0) {
+            loadUsers();
           }
           viewReady = true;
           break;
@@ -79,81 +95,35 @@
 
 {#if !viewReady}
   <Spinner />
-{:else if currentUser}
+{:else}
   <div class="sidebar-container">
-    <ViewSelector on:viewChange={viewChange} />
-    <input bind:value={searchTerm} placeholder="Search" on:input={search} />
-    {#if listLoading}
-      <Spinner />
+    {#if currentUser}
+      <ViewSelector on:viewChange={viewChange} />
+      <input bind:value={searchTerm} placeholder="Search" on:input={search} />
+      {#if listLoading}
+        <Spinner />
+      {:else}
+        <UsersList
+          bind:apiService
+          bind:users
+          on:follow={follow}
+          on:unfollow={unfollow}
+        />
+      {/if}
     {:else}
-      <ul class="no-bullets">
-        {#each users as user (user.uuid)}
-          <li class="user">
-            <p class="user-name">{user.name}</p>
-            <p class="song-info" class:nothing={!user.currentlyPlayingName}>
-              {user.currentlyPlayingName || "Nothing"}
-            </p>
-            {#if user.currentlyPlayingUri}
-              <i
-                class="play-song-btn codicon codicon-play-circle"
-                on:click|once={() =>
-                  playSong({
-                    name: user.currentlyPlayingName,
-                    uri: user.currentlyPlayingUri,
-                  })}
-              />
-            {/if}
-          </li>
-        {/each}
-      </ul>
+      <p>Please log in to use VSCode tunes.</p>
+      <button class="auth-btn" on:click={() => authenticate("spotify")}>
+        Log in with Spotify
+      </button>
     {/if}
   </div>
-{:else}
-  <p>Please log in to use VSCode tunes.</p>
-  <button>Log in with Spotify</button>
 {/if}
 
 <style>
   .sidebar-container {
     padding: 5px 15px;
   }
-  ul.no-bullets {
-    padding: 0;
-    margin-top: 15px;
-  }
-  ul.no-bullets li {
-    list-style-type: none;
-    margin: 0;
-    margin-bottom: 5px;
-    padding: 0;
-  }
-  .user-name {
-    font-weight: bold;
-    white-space: nowrap;
-    margin-right: 7px;
-  }
-  .user {
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    flex-direction: row;
-  }
-  .song-info {
-    color: green;
-    flex-shrink: 1;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
-  }
-  .song-info.nothing {
-    color: var(--vscode-gitDecoration-ignoredResourceForeground);
-  }
-  .play-song-btn {
-    margin-left: 5px;
-    cursor: pointer;
-    /* color: var(--vscode-gitDecoration-ignoredResourceForeground); */
-  }
-  .play-song-btn:hover {
-    color: var(--vscode-menu-selectionForeground);
+  .auth-btn {
+    margin-top: 10px;
   }
 </style>
