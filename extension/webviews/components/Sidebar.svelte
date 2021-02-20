@@ -10,6 +10,7 @@
   let currentUser: any = null;
   let accessToken = "";
   let searchTerm = "";
+  let searchResults: any[] = [];
   let currentView = "followed";
   let viewReady = false;
   let listLoading = true;
@@ -18,37 +19,37 @@
     tsvscode.postMessage({ type: "authenticate", value: provider });
   };
 
-  const search = debounce((_e: any) => {
-    tsvscode.postMessage({
-      type: "onInfo",
-      value: `Searched for ${searchTerm}`,
-    });
+  const search = debounce(async (_e: any) => {
+    loadUsers();
   }, 1000);
 
   const viewChange = (event: CustomEvent) => {
     currentView = event.detail;
+    searchTerm = "";
     loadUsers();
   };
 
   const follow = (event: CustomEvent) => {
     const user = event.detail;
-    user.followed = true;
     if (currentView === "followed") {
       users = [...users, user];
+    } else {
+      users = users;
     }
   };
 
   const unfollow = (event: CustomEvent) => {
     const user = event.detail;
-    user.followed = false;
     if (currentView === "followed") {
       users = users.filter((u: any) => u.uuid !== user.uuid);
+    } else {
+      users = users;
     }
   };
 
   const loadUsers = async () => {
     listLoading = true;
-    users = (await apiService.getUsers(currentView)).filter(
+    users = (await apiService.getUsers(currentView, searchTerm)).filter(
       (u: any) => u.uuid !== currentUser.uuid
     );
     listLoading = false;
@@ -103,12 +104,14 @@
       {#if listLoading}
         <Spinner />
       {:else}
-        <UsersList
-          bind:apiService
-          bind:users
-          on:follow={follow}
-          on:unfollow={unfollow}
-        />
+        <div class="users-list">
+          <UsersList
+            bind:apiService
+            bind:users
+            on:follow={follow}
+            on:unfollow={unfollow}
+          />
+        </div>
       {/if}
     {:else}
       <p>Please log in to use VSCode tunes.</p>
@@ -125,5 +128,8 @@
   }
   .auth-btn {
     margin-top: 10px;
+  }
+  .users-list {
+    margin-top: 15px;
   }
 </style>

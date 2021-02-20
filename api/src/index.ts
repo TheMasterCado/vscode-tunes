@@ -167,23 +167,46 @@ const main = async () => {
     }
 
     const view = req.query.view || "everyone";
+    const searchQuery = req.query.q?.toString() || "";
     const limit = req.query.limit || 200;
     const offset = req.query.offset || 0;
 
     let users;
+    let query;
     switch (view) {
       case "everyone":
-        users = await User.find({
-          order: { currentlyPlayingAt: "DESC" },
-          take: +limit,
-          skip: +offset,
-        });
-        break;
-      case "followed":
-        users = (
+        const followedIds = (
           await getRepository(Follower)
             .createQueryBuilder("follower")
-            .innerJoinAndSelect("follower.followed", "followed")
+            .select("follower.followedId", "followedId")
+            .where("follower.userId = :userId", { userId: user.id })
+            .getRawMany()
+        ).map((f) => f.followedId);
+        query = getRepository(User).createQueryBuilder("user");
+        if (searchQuery.length > 0) {
+          query = query.where("user.name LIKE :searchQuery", {
+            searchQuery: `%${searchQuery}%`,
+          });
+        }
+        users = (
+          await query
+            .orderBy("user.currentlyPlayingAt", "DESC")
+            .take(+limit)
+            .skip(+offset)
+            .getMany()
+        ).map((u) => ({ ...u, followed: followedIds.includes(u.id) }));
+        break;
+      case "followed":
+        query = getRepository(Follower)
+          .createQueryBuilder("follower")
+          .innerJoinAndSelect("follower.followed", "followed");
+        if (searchQuery.length > 0) {
+          query = query.where("followed.name LIKE :searchQuery", {
+            searchQuery: `%${searchQuery}%`,
+          });
+        }
+        users = (
+          await query
             .orderBy("followed.currentlyPlayingAt", "DESC")
             .take(+limit)
             .skip(+offset)

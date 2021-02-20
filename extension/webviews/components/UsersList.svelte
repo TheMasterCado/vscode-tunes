@@ -5,6 +5,7 @@
 
   export let apiService: ApiService;
   export let users: any[] = [];
+  export let showListen = true;
 
   const dispatch = createEventDispatcher();
 
@@ -15,8 +16,10 @@
   const toggleFollow = async (user: any) => {
     if (user.followed && (await apiService.deleteFollowed(user.uuid))) {
       dispatch("unfollow", user);
+      user.followed = false;
     } else if (await apiService.putFollowed(user.uuid)) {
       dispatch("follow", user);
+      user.followed = true;
     }
   };
 </script>
@@ -24,26 +27,29 @@
 <ul class="no-bullets">
   {#each users as user (user.uuid)}
     <li class="user">
-      <i
-        class="user-btn left codicon"
-        class:codicon-star-empty={!user.followed}
-        class:codicon-star-full={user.followed}
-        on:click|once={() => toggleFollow(user)}
-      />
-      <p class="user-name">{user.name}</p>
+      <p class="user-name">
+        <i
+          class="user-btn left codicon"
+          class:codicon-star-empty={!user.followed}
+          class:codicon-star-full={user.followed}
+          class:active={user.followed}
+          on:click={() => toggleFollow(user)}
+        />
+        {user.name}
+      </p>
       <p class="song-info" class:nothing={!user.currentlyPlayingName}>
         {user.currentlyPlayingName || "Nothing"}
+        {#if showListen && user.currentlyPlayingUri}
+          <i
+            class="user-btn right codicon codicon-play-circle"
+            on:click={() =>
+              playSong({
+                name: user.currentlyPlayingName,
+                uri: user.currentlyPlayingUri,
+              })}
+          />
+        {/if}
       </p>
-      {#if user.currentlyPlayingUri}
-        <i
-          class="user-btn right codicon codicon-play-circle"
-          on:click|once={() =>
-            playSong({
-              name: user.currentlyPlayingName,
-              uri: user.currentlyPlayingUri,
-            })}
-        />
-      {/if}
     </li>
   {:else}
     <p class="empty-msg">The list is empty</p>
@@ -53,28 +59,30 @@
 <style>
   ul.no-bullets {
     padding: 0;
-    margin-top: 15px;
   }
   ul.no-bullets li {
     list-style-type: none;
     margin: 0;
-    margin-bottom: 5px;
+    margin-bottom: 15px;
     padding: 0;
   }
   .user-name {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    font-size: medium;
     font-weight: bold;
     white-space: nowrap;
     margin-right: 7px;
   }
   .user {
     overflow: hidden;
-    display: flex;
-    align-items: center;
-    flex-direction: row;
   }
   .song-info {
     color: green;
-    flex-shrink: 1;
+    display: flex;
+    align-items: center;
+    width: 100%;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -88,7 +96,11 @@
   .user-btn.right {
     margin-left: 5px;
   }
+  .user-btn.active {
+    color: var(--vscode-textLink-activeForeground);
+  }
   .user-btn {
+    color: var(--vscode-foreground);
     cursor: pointer;
   }
   .user-btn:hover {

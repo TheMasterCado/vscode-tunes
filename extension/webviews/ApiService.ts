@@ -17,9 +17,15 @@ export class ApiService {
     }
   }
 
-  async getUsers(view: String, offset = 0) {
+  async getUsers(view: string, query: string, offset = 0) {
     const responseList = await fetch(
-      `${apiBaseUrl}/users?view=${view}&limit=50&offset=${offset}`,
+      `${apiBaseUrl}/users?` +
+        new URLSearchParams({
+          view: view,
+          limit: "50",
+          offset: `${offset}`,
+          q: query,
+        }),
       {
         headers: {
           authorization: `Bearer ${this.accessToken}`,
