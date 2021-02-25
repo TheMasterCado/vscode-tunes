@@ -50,7 +50,7 @@
   const loadUsers = async () => {
     listLoading = true;
     users = (await apiService.getUsers(currentView, searchTerm)).filter(
-      (u: any) => u.uuid !== currentUser.uuid
+      (u: any) => u.uuid !== currentUser.uuid || true
     );
     listLoading = false;
   };
@@ -89,6 +89,23 @@
         }
       }
     });
+
+    const ws = new WebSocket(apiWsUrl);
+
+    ws.onmessage = (e) => {
+      const data = JSON.parse(e.data);
+      if (data.userUuid) {
+        const user = users.find((u) => u.uuid === data.userUuid);
+        user.currentlyPlayingName = data.currentlyPlayingName;
+        user.currentlyPlayingUri = data.currentlyPlayingUri;
+        user.currentlyPlayingAt = data.currentlyPlayingAt;
+        users = [...users];
+      }
+    };
+
+    ws.onclose = (e) => {
+      console.log("closed! " + e.code);
+    };
 
     tsvscode.postMessage({ type: "getAccessToken", value: null });
   });

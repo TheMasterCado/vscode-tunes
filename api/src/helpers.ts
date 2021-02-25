@@ -27,3 +27,9 @@ export const validateAuthorizationHeader = async (
 
   return await User.findOne({ where: { uuid: userUuid } });
 };
+
+export const isUserActive = (at: Date) => {
+  const oneHourAgo = new Date();
+  oneHourAgo.setUTCHours(oneHourAgo.getUTCHours() - 1);
+  return at > oneHourAgo;
+};

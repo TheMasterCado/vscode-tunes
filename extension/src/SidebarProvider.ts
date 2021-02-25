@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { apiBaseUrl } from "./constants";
+import { apiBaseUrl, apiWsUrl } from "./constants";
 import { ExtensionState } from "./ExtensionState";
 import { getNonce } from "./getNonce";
 import { startPlayingUri } from "./spotify";
@@ -128,6 +128,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         <script nonce="${nonce}">
           const tsvscode = acquireVsCodeApi();
           const apiBaseUrl = ${JSON.stringify(apiBaseUrl)};
+          const apiWsUrl = ${JSON.stringify(apiWsUrl)};
         </script>
       </head>
       <body>

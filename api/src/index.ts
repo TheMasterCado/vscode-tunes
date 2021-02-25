@@ -12,9 +12,15 @@ import cors from "cors";
 import querystring from "querystring";
 import { v4 as uuid } from "uuid";
 import axios from "axios";
-import { validateAuthorizationHeader } from "./helpers";
+import { isUserActive, validateAuthorizationHeader } from "./helpers";
 import { Follower } from "./entities/Follower";
 import { runSeed } from "./seed";
+const expressWs = require("express-ws");
+import {
+  Instance as ExpressWsInstance,
+  Application as ExpressWsApplication,
+} from "express-ws";
+import WebSocket from "ws";
 
 const main = async () => {
   // connect to db
@@ -30,7 +36,10 @@ const main = async () => {
     synchronize: !__prod__,
   });
   // await runSeed();
-  const app = express();
+  const _app = express();
+  const appWs: ExpressWsInstance = expressWs(_app);
+  // Fix type for ws app
+  const app = (_app as unknown) as ExpressWsApplication;
   passport.serializeUser((user: any, done) => {
     done(null, user.accessToken);
   });
@@ -99,8 +108,19 @@ const main = async () => {
       user.currentlyPlayingUri = currentlyPlaying?.uri;
       user.currentlyPlayingAt = new Date();
       await user.save();
+      appWs.getWss().clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(
+            JSON.stringify({
+              userUuid: user.uuid,
+              currentlyPlayingName: user.currentlyPlayingName,
+              currentlyPlayingUri: user.currentlyPlayingUri,
+              currentlyPlayingAt: user.currentlyPlayingAt,
+            })
+          );
+        }
+      });
     }
-
     res.send({ user });
   });
   app.put("/me/followed", async (req, res) => {
@@ -112,7 +132,6 @@ const main = async () => {
     }
 
     const userUuid = req.body.user_uuid;
-    console.log("ss", req.body);
     if (!userUuid) {
       res.sendStatus(422);
       return;
@@ -194,7 +213,11 @@ const main = async () => {
             .take(+limit)
             .skip(+offset)
             .getMany()
-        ).map((u) => ({ ...u, followed: followedIds.includes(u.id) }));
+        ).map((u) => ({
+          ...u,
+          followed: followedIds.includes(u.id),
+          active: isUserActive(u.currentlyPlayingAt),
+        }));
         break;
       case "followed":
         query = getRepository(Follower)
@@ -211,7 +234,11 @@ const main = async () => {
             .take(+limit)
             .skip(+offset)
             .getMany()
-        ).map((f) => ({ ...f.followed, followed: true }));
+        ).map((f) => ({
+          ...f.followed,
+          followed: true,
+          active: isUserActive(f.followed.currentlyPlayingAt),
+        }));
         break;
     }
     res.send({ users });
@@ -256,6 +283,9 @@ const main = async () => {
       res.sendStatus(401);
     }
   });
+  //ws
+
+  app.ws("/realtime", async (ws, req) => {});
 
   app.listen(3002, () => {
     console.log("listening on localhost:3002");

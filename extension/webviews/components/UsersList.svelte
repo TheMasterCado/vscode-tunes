@@ -37,8 +37,15 @@
         />
         {user.name}
       </p>
-      <p class="song-info" class:nothing={!user.currentlyPlayingName}>
-        {user.currentlyPlayingName || "Nothing"}
+      <div class="song-wrapper">
+        <div class="song-info-wrapper">
+          <p
+            class="song-info"
+            class:nothing={!user.currentlyPlayingName || !user.active}
+          >
+            {user.currentlyPlayingName || "Nothing"}
+          </p>
+        </div>
         {#if showListen && user.currentlyPlayingUri}
           <i
             class="user-btn right codicon codicon-play-circle"
@@ -49,7 +56,7 @@
               })}
           />
         {/if}
-      </p>
+      </div>
     </li>
   {:else}
     <p class="empty-msg">The list is empty</p>
@@ -78,14 +85,27 @@
   .user {
     overflow: hidden;
   }
+  .song-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+  .song-info-wrapper {
+    overflow: hidden;
+  }
   .song-info {
     color: green;
     display: flex;
     align-items: center;
-    width: 100%;
     white-space: nowrap;
     text-overflow: ellipsis;
-    overflow: hidden;
+    flex-shrink: 1;
+  }
+  .song-info:hover:not(.nothing) {
+    animation-name: songNameScroll;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-duration: 7s;
   }
   .song-info.nothing {
     color: var(--vscode-gitDecoration-ignoredResourceForeground);
@@ -110,5 +130,20 @@
     width: 100%;
     text-align: center;
     color: var(--vscode-gitDecoration-ignoredResourceForeground);
+  }
+
+  @keyframes songNameScroll {
+    0% {
+      transform: translateX(0);
+    }
+    50% {
+      transform: translateX(-120%);
+    }
+    50.1% {
+      transform: translateX(120%);
+    }
+    100% {
+      transform: translateX(0);
+    }
   }
 </style>
