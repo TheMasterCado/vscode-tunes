@@ -2,10 +2,10 @@
 	"name": "vscode-tunes",
 	"displayName": "VSCode tunes",
 	"description": "Music community for programmers",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"publisher": "TheMasterCado",
 	"license": "MIT",
-	"icon": "",
+	"icon": "media/tunes.png",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/TheMasterCado/vscode-tunes"
@@ -35,7 +35,7 @@
 				{
 					"id": "vscode-tunes-sidebar-view",
 					"title": "VSCode tunes",
-					"icon": "media/tunes.svg"
+					"icon": "media/tunes.png"
 				}
 			]
 		},
@@ -45,7 +45,7 @@
 					"type": "webview",
 					"id": "vscode-tunes-sidebar",
 					"name": "VSCode tunes",
-					"icon": "media/tunes.svg",
+					"icon": "media/tunes.png",
 					"contextualTitle": "VSCode tunes"
 				}
 			]
@@ -100,12 +100,14 @@
 		"@typescript-eslint/eslint-plugin": "^4.14.1",
 		"@typescript-eslint/parser": "^4.14.1",
 		"concurrently": "^5.3.0",
+		"css-loader": "^5.1.0",
 		"eslint": "^7.19.0",
 		"glob": "^7.1.6",
 		"mocha": "^8.2.1",
 		"rollup": "^2.39.0",
 		"rollup-plugin-svelte": "^6.1.1",
 		"rollup-plugin-terser": "^7.0.2",
+		"style-loader": "^2.0.0",
 		"svelte": "^3.0.0",
 		"svelte-check": "^1.0.0",
 		"svelte-preprocess": "^4.0.0",
