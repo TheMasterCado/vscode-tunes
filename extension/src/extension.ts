@@ -2,19 +2,20 @@
 import { stat } from "fs";
 import * as vscode from "vscode";
 import { authenticate } from "./authenticate";
+import { __prod__ } from "./constants";
 import { ExtensionState } from "./ExtensionState";
 import { SidebarProvider } from "./SidebarProvider";
 import { getCurrentlyPlaying, togglePlayback } from "./spotify";
 import { updateCurrentlyPlaying } from "./vscodeTunesApi";
 
 let statusBarItem: vscode.StatusBarItem;
+let outputChannel: vscode.OutputChannel;
 
 export function activate(context: vscode.ExtensionContext) {
   ExtensionState.state = context.globalState;
 
-  const output = vscode.window.createOutputChannel("VSCode tunes");
-  output.show();
-  output.appendLine("Started extension.");
+  outputChannel = vscode.window.createOutputChannel("VSCode tunes");
+  outputChannel.appendLine("Started extension.");
   // Create and register sidebar provider
   const sidebarProvider = new SidebarProvider(context.extensionUri);
   context.subscriptions.push(
@@ -68,7 +69,7 @@ export function activate(context: vscode.ExtensionContext) {
             value: currentlyPlaying,
           });
           await updateCurrentlyPlaying(currentlyPlaying);
-          output.appendLine(
+          outputChannel.appendLine(
             `Current user is now listening to ${currentlyPlaying.name}`
           );
         }

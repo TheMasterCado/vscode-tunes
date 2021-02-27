@@ -26,10 +26,10 @@ const main = async () => {
   // connect to db
   await createConnection({
     type: "mysql",
-    host: "localhost",
+    host: process.env.DB_HOST || "localhost",
     port: 3306,
-    username: "root",
-    password: "password",
+    username: process.env.DB_USER || "root",
+    password: process.env.DB_PASSWORD || "password",
     database: "vscode-tunes",
     entities: [join(__dirname, "./entities/*.*")],
     logging: !__prod__,
@@ -53,7 +53,7 @@ const main = async () => {
       {
         clientID: process.env.SPOTIFY_CLIENT_ID,
         clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-        callbackURL: "http://localhost:3002/auth/spotify/callback",
+        callbackURL: `${process.env.API_BASE_URL}/auth/spotify/callback`,
       },
       async (accessToken, refreshToken, profile, done) => {
         let user = await User.findOne({ where: { spotifyId: profile.id } });
