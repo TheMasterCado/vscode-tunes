@@ -77,6 +77,7 @@
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run package",
+		"publish": "vsce publish",
 		"compile": "webpack",
 		"watch": "concurrently \"rollup -c -w\" \"webpack --watch\"",
 		"package": "rollup -c && webpack --mode production --devtool hidden-source-map",

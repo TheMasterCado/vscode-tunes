@@ -1,0 +1,18 @@
+---
+kind: pipeline
+type: docker
+name: build and publish app
+
+steps:
+  - name: package and publish
+    image: node:15
+    commands:
+      - cd extension
+      - vsce publish
+    environment:
+      VSCE_PAT:
+        from_secret: VSCE_ACCESS_TOKEN
+
+trigger:
+  ref:
+    - refs/tags/*
