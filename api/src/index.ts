@@ -222,7 +222,8 @@ const main = async () => {
       case "followed":
         query = getRepository(Follower)
           .createQueryBuilder("follower")
-          .innerJoinAndSelect("follower.followed", "followed");
+          .innerJoinAndSelect("follower.followed", "followed")
+          .where("follower.userId = :userId", { userId: user.id });
         if (searchQuery.length > 0) {
           query = query.where("followed.name LIKE :searchQuery", {
             searchQuery: `%${searchQuery}%`,

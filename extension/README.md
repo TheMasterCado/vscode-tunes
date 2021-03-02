@@ -25,10 +25,12 @@ This extension contributes the following settings:
 
 ## Known Issues
 
-No know issue right now, feel free to submit any bugs you encounter [on GitHub](https://github.com/TheMasterCado/vscode-tunes/issues).
+- When using the extension inside Windows WSL, the sidebar does not load properly the first time.
+
+Feel free to submit any bugs you encounter [on GitHub](https://github.com/TheMasterCado/vscode-tunes/issues).
 
 ## Release Notes
 
-### 1.1.0
+### 1.2.0
 
 Initial release of VSCode tunes
