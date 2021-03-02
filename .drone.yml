@@ -8,7 +8,8 @@ steps:
     image: node:15
     commands:
       - cd extension
-      - vsce publish
+      - npm install
+      - npm run publish
     environment:
       VSCE_PAT:
         from_secret: VSCE_ACCESS_TOKEN
