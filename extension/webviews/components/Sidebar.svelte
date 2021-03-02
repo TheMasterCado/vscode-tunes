@@ -11,6 +11,7 @@
   let accessToken = "";
   let searchTerm = "";
   let searchResults: any[] = [];
+  let ws: WebSocket | undefined = undefined;
   let currentView = "followed";
   let viewReady = false;
   let listLoading = true;
@@ -55,6 +56,30 @@
     listLoading = false;
   };
 
+  const setupWebsocket = () => {
+    if (!ws || ws.readyState === ws.CLOSED) {
+      ws = new WebSocket(apiWsUrl);
+
+      ws.onmessage = (e) => {
+        const data = JSON.parse(e.data);
+        if (data.userUuid) {
+          const user = users.find((u) => u.uuid === data.userUuid);
+          if (user) {
+            user.currentlyPlayingName = data.currentlyPlayingName;
+            user.currentlyPlayingUri = data.currentlyPlayingUri;
+            user.currentlyPlayingAt = data.currentlyPlayingAt;
+            users = [...users];
+          }
+        }
+      };
+
+      ws.onclose = (e) => {
+        console.log("closed! " + e.code);
+        setupWebsocket();
+      };
+    }
+  };
+
   onMount(async () => {
     window.addEventListener("message", async (event) => {
       const message = event.data;
@@ -78,6 +103,7 @@
 
           if (currentUser && users.length === 0) {
             loadUsers();
+            setupWebsocket();
           }
           viewReady = true;
           break;
@@ -89,23 +115,6 @@
         }
       }
     });
-
-    const ws = new WebSocket(apiWsUrl);
-
-    ws.onmessage = (e) => {
-      const data = JSON.parse(e.data);
-      if (data.userUuid) {
-        const user = users.find((u) => u.uuid === data.userUuid);
-        user.currentlyPlayingName = data.currentlyPlayingName;
-        user.currentlyPlayingUri = data.currentlyPlayingUri;
-        user.currentlyPlayingAt = data.currentlyPlayingAt;
-        users = [...users];
-      }
-    };
-
-    ws.onclose = (e) => {
-      console.log("closed! " + e.code);
-    };
 
     tsvscode.postMessage({ type: "getAccessToken", value: null });
   });

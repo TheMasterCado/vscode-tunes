@@ -64,7 +64,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   public async sendAccessTokenToView() {
     this._view?.webview.postMessage({
       type: "token",
-      value: await ExtensionState.getAccessToken(),
+      value: ExtensionState.getAccessToken(),
     });
   }
 
