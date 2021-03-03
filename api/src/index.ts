@@ -12,7 +12,7 @@ import cors from "cors";
 import querystring from "querystring";
 import { v4 as uuid } from "uuid";
 import axios from "axios";
-import { isUserActive, validateAuthorizationHeader } from "./helpers";
+import { isUserActive, mapUser, validateAuthorizationHeader } from "./helpers";
 import { Follower } from "./entities/Follower";
 import { runSeed } from "./seed";
 const expressWs = require("express-ws");
@@ -214,9 +214,8 @@ const main = async () => {
             .skip(+offset)
             .getMany()
         ).map((u) => ({
-          ...u,
+          ...mapUser(u),
           followed: followedIds.includes(u.id),
-          active: isUserActive(u.currentlyPlayingAt),
         }));
         break;
       case "followed":
@@ -236,9 +235,8 @@ const main = async () => {
             .skip(+offset)
             .getMany()
         ).map((f) => ({
-          ...f.followed,
+          ...mapUser(f.followed),
           followed: true,
-          active: isUserActive(f.followed.currentlyPlayingAt),
         }));
         break;
     }

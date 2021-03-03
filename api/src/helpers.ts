@@ -29,7 +29,29 @@ export const validateAuthorizationHeader = async (
 };
 
 export const isUserActive = (at: Date) => {
+  const tenMinutesAgo = new Date();
+  tenMinutesAgo.setUTCMinutes(tenMinutesAgo.getUTCMinutes() - 10);
+  return at > tenMinutesAgo;
+};
+
+export const isUserConsideredPlayingNothing = (at: Date) => {
   const oneHourAgo = new Date();
   oneHourAgo.setUTCHours(oneHourAgo.getUTCHours() - 1);
-  return at > oneHourAgo;
+  return at <= oneHourAgo;
+};
+
+export const mapUser = (u: User) => {
+  const consideredPlayingNothing = isUserConsideredPlayingNothing(
+    u.currentlyPlayingAt
+  );
+  return {
+    ...u,
+    currentlyPlayingName: consideredPlayingNothing
+      ? null
+      : u.currentlyPlayingName,
+    currentlyPlayingUri: consideredPlayingNothing
+      ? null
+      : u.currentlyPlayingUri,
+    active: isUserActive(u.currentlyPlayingAt),
+  };
 };
