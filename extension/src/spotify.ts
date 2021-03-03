@@ -34,10 +34,6 @@ export const getCurrentlyPlaying = async (
 
   try {
     const response = await spotifyApi.getMyCurrentPlayingTrack();
-    ExtensionState.setSpotifyTokens(
-      "allobobino",
-      ExtensionState.getSpotifyRefreshToken() || ""
-    );
     return formatCurrentlyPlaying(response.body);
   } catch (err) {
     if (err.statusCode === 401 && !isRefreshTokenRun) {

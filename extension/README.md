@@ -31,7 +31,7 @@ Feel free to submit any bugs you encounter [on GitHub](https://github.com/TheMas
 
 ## Release Notes
 
-## 1.2.1
+## 1.2.2
 
 Fixed bug with the Spotify token 
 
