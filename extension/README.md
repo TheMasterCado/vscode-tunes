@@ -31,6 +31,10 @@ Feel free to submit any bugs you encounter [on GitHub](https://github.com/TheMas
 
 ## Release Notes
 
+## 1.2.1
+
+Fixed bug with the Spotify token 
+
 ### 1.2.0
 
 Initial release of VSCode tunes
