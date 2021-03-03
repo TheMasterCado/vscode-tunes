@@ -1,7 +1,6 @@
 import SpotifyWebApi from "spotify-web-api-node";
 import { ExtensionState } from "./ExtensionState";
 import { refreshSpotifyAccessToken } from "./vscodeTunesApi";
-import * as vscode from "vscode";
 
 const getSpotifyApi = async () => {
   const spotifyApi = new SpotifyWebApi();
@@ -28,34 +27,64 @@ const formatCurrentlyPlaying = (
   }
 };
 
-export const getCurrentlyPlaying = async () => {
+export const getCurrentlyPlaying = async (
+  isRefreshTokenRun = false
+): Promise<any> => {
   const spotifyApi = await getSpotifyApi();
 
-  const response = await spotifyApi.getMyCurrentPlayingTrack();
-  return formatCurrentlyPlaying(response.body);
+  try {
+    const response = await spotifyApi.getMyCurrentPlayingTrack();
+    ExtensionState.setSpotifyTokens(
+      "allobobino",
+      ExtensionState.getSpotifyRefreshToken() || ""
+    );
+    return formatCurrentlyPlaying(response.body);
+  } catch (err) {
+    if (err.statusCode === 401 && !isRefreshTokenRun) {
+      ExtensionState.setSpotifyTokens("");
+      return await getCurrentlyPlaying(true);
+    }
+  }
 };
 
-export const startPlayingUri = async (uri: string) => {
+export const startPlayingUri = async (
+  uri: string,
+  isRefreshTokenRun = false
+): Promise<void> => {
   const spotifyApi = await getSpotifyApi();
 
   try {
     await spotifyApi.play({ uris: [uri] });
   } catch (err) {
-    throw new SpotifyError("Cannot play this, maybe it's not a real track");
+    if (err.statusCode === 401 && !isRefreshTokenRun) {
+      ExtensionState.setSpotifyTokens("");
+      await startPlayingUri(uri, true);
+    } else {
+      throw new SpotifyError("Cannot play this, maybe it's not a real track");
+    }
   }
 };
 
-export const togglePlayback = async () => {
+export const togglePlayback = async (
+  isRefreshTokenRun = false
+): Promise<any> => {
   const spotifyApi = await getSpotifyApi();
 
-  const playback = await spotifyApi.getMyCurrentPlayingTrack();
-  if (playback.body.is_playing) {
-    await spotifyApi.pause();
-  } else {
-    await spotifyApi.play();
+  try {
+    const playback = await spotifyApi.getMyCurrentPlayingTrack();
+    if (playback.body.is_playing) {
+      await spotifyApi.pause();
+    } else {
+      await spotifyApi.play();
+    }
+    playback.body.is_playing = !playback.body.is_playing;
+    return formatCurrentlyPlaying(playback.body);
+  } catch (err) {
+    if (err.statusCode === 401 && !isRefreshTokenRun) {
+      ExtensionState.setSpotifyTokens("");
+      return await togglePlayback(true);
+    }
   }
-  playback.body.is_playing = !playback.body.is_playing;
-  return formatCurrentlyPlaying(playback.body);
 };
 
 export class SpotifyError extends Error {}

@@ -18,9 +18,14 @@ export class ExtensionState {
     return this.state.get(ACCESS_TOKEN_KEY);
   }
 
-  static setSpotifyTokens(accessToken: string, refreshToken: string) {
+  static setSpotifyTokens(
+    accessToken: string,
+    refreshToken?: string | undefined
+  ) {
     this.spotifyAccessToken = accessToken;
-    return this.state.update(SPOTIFY_REFRESH_TOKEN_KEY, refreshToken);
+    if (refreshToken !== undefined) {
+      return this.state.update(SPOTIFY_REFRESH_TOKEN_KEY, refreshToken);
+    }
   }
 
   static getSpotifyRefreshToken(): string | undefined {
