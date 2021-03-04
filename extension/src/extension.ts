@@ -70,7 +70,9 @@ export function activate(context: vscode.ExtensionContext) {
           });
           await updateCurrentlyPlaying(currentlyPlaying);
           outputChannel.appendLine(
-            `Current user is now listening to ${currentlyPlaying.name}`
+            `Current user is now listening to ${
+              currentlyPlaying?.name || "nothing"
+            }`
           );
         }
       }

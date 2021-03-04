@@ -2,7 +2,7 @@
 	"name": "vscode-tunes",
 	"displayName": "VSCode tunes",
 	"description": "Music community for programmers",
-	"version": "1.2.2",
+	"version": "1.2.3",
 	"publisher": "TheMasterCado",
 	"license": "MIT",
 	"icon": "media/vscode_tunes_logo.png",

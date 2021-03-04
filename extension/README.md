@@ -31,6 +31,10 @@ Feel free to submit any bugs you encounter [on GitHub](https://github.com/TheMas
 
 ## Release Notes
 
+## 1.2.3
+
+Fixed bug where listening to nothing caused a log out
+
 ## 1.2.2
 
 Fixed bug with the Spotify token 
