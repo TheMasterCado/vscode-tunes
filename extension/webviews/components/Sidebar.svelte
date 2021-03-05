@@ -75,7 +75,9 @@
 
       ws.onclose = (e) => {
         console.log("closed! " + e.code);
-        setupWebsocket();
+        setTimeout(() => {
+          setupWebsocket();
+        }, 5000); // reconnect in 5 sec
       };
     }
   };
@@ -109,9 +111,11 @@
           break;
         }
         case "currentUserCurrentlyPlaying": {
-          currentUser.currentlyPlayingName = message.value.name;
-          currentUser.currentlyPlayingUri = message.value.uri;
-          break;
+          if (currentUser) {
+            currentUser.currentlyPlayingName = message.value.name;
+            currentUser.currentlyPlayingUri = message.value.uri;
+            break;
+          }
         }
       }
     });

@@ -31,6 +31,10 @@ Feel free to submit any bugs you encounter [on GitHub](https://github.com/TheMas
 
 ## Release Notes
 
+## 1.2.4
+
+Fixed bug that caused user to relogin each time
+
 ## 1.2.3
 
 Fixed bug where listening to nothing caused a log out

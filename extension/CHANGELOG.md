@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.2.4 (2021-03-05)
+
+- Fixed bug that caused user to relogin each time
+
 ## 1.2.3 (2021-03-04)
 
 - Fixed bug where listening to nothing caused a log out
