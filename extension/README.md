@@ -29,20 +29,8 @@ This extension contributes the following settings:
 
 Feel free to submit any bugs you encounter [on GitHub](https://github.com/TheMasterCado/vscode-tunes/issues).
 
-## Release Notes
+## Support me
 
-## 1.2.4
+Hey, if you like the stuff I make and want to help me pay for it
 
-Fixed bug that caused user to relogin each time
-
-## 1.2.3
-
-Fixed bug where listening to nothing caused a log out
-
-## 1.2.2
-
-Fixed bug with the Spotify token 
-
-### 1.2.0
-
-Initial release of VSCode tunes
+[<img src="https://cdn.buymeacoffee.com/buttons/v2/default-green.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" >](https://www.buymeacoffee.com/themastercado)
