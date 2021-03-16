@@ -2,6 +2,7 @@ import "reflect-metadata";
 require("dotenv-safe").config();
 import express from "express";
 import { join } from "path";
+import { existsSync } from "fs";
 import { createConnection, getRepository } from "typeorm";
 import { __prod__ } from "./constants";
 import passport from "passport";
@@ -282,6 +283,25 @@ const main = async () => {
       res.sendStatus(401);
     }
   });
+
+  app.get("/public/:file", (req, res) => {
+    const filename = req.params.file.replace(new RegExp("\\.\\."), "");
+    const filepath = join(__dirname, `../public/${filename}`);
+    try {
+      if (existsSync(filepath)) {
+        res.sendFile(filepath);
+      } else {
+        res.sendStatus(404);
+      }
+    } catch (err) {
+      res.sendStatus(404);
+    }
+  });
+
+  app.get("/", (req, res) => {
+    res.redirect("/public/index.html");
+  });
+
   //ws
 
   app.ws("/realtime", async (ws, req) => {});

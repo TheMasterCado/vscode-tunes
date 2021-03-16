@@ -1,0 +1,78 @@
+:root {
+  --bg-color-1: #1DB954;
+  --bg-color-2: #1c7539;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: linear-gradient(var(--bg-color-1), var(--bg-color-2));
+  overflow: hidden;
+}
+
+h1, h2 {
+  font-family: 'Oswald', sans-serif;
+}
+
+h1 {
+  font-size: 52px;
+}
+
+.site-bg-image {
+  z-index: -1;
+  position: absolute;
+  height: 130%;
+  top: -150px;
+  left: -100px;
+  transform: rotate(15deg);
+  filter: brightness(0%) blur(5px);
+  opacity: 0.05;
+}
+
+.main-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.socials-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.socials-container a {
+  color: black;
+  margin: 0 10px;
+  transition: all ease-out 0.2s;
+}
+
+.socials-container a:hover {
+  transform: rotate(10deg) scale(1.3);;
+}
+
+.socials-container a svg {
+  width: 40px;
+  height: 40px;
+}
+
+.socials-container a img {
+  width: 45px;
+  height: 45px;
+}
+
+.copyright {
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  font-size: small;
+  margin-right: 60px;
+  position: absolute;
+  bottom: 20px;
+  width: 100%;
+  text-align: right;
+}
