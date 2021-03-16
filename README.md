@@ -19,3 +19,9 @@ This is a monorepo for both the extension and the api.
 ## Credits
 
 Thanks a lot to [Ben Awad](https://github.com/benawad) for his Youtube videos!
+
+## Support me
+
+Hey, if you like the stuff I make and want to help me pay for it
+
+[<img src="https://cdn.buymeacoffee.com/buttons/v2/default-green.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" >](https://www.buymeacoffee.com/themastercado)
