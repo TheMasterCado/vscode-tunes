@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## 1.3 (2021-03-17)
+## 1.3.0 (2021-03-17)
 
 - Added actual website, domain and SSL to the extension API
 
