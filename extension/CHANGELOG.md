@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.3.1 (2021-03-17)
+
+- Fixed SSL bug with the axios library
+
 ## 1.3.0 (2021-03-17)
 
 - Added actual website, domain and SSL to the extension API
