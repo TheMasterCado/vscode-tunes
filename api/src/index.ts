@@ -284,6 +284,7 @@ const main = async () => {
     }
   });
 
+  // public
   app.get("/public/:file", (req, res) => {
     const filename = req.params.file.replace(new RegExp("\\.\\."), "");
     const filepath = join(__dirname, `../public/${filename}`);
@@ -298,8 +299,29 @@ const main = async () => {
     }
   });
 
+  // .well-known
+  app.get("/.well-known/:file", (req, res) => {
+    const filename = req.params.file.replace(new RegExp("\\.\\."), "");
+    const filepath = join(__dirname, `../.well-known/${filename}`);
+    try {
+      if (existsSync(filepath)) {
+        res.sendFile(filepath);
+      } else {
+        res.sendStatus(404);
+      }
+    } catch (err) {
+      res.sendStatus(404);
+    }
+  });
+
+  // views
+
   app.get("/", (req, res) => {
-    res.redirect("/public/index.html");
+    res.sendFile(join(__dirname, "../views/index.html"));
+  });
+
+  app.get("/auth-over", (req, res) => {
+    res.sendFile(join(__dirname, "../views/auth-over.html"));
   });
 
   //ws

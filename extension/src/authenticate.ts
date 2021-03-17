@@ -2,15 +2,20 @@ import * as vscode from "vscode";
 import { apiBaseUrl } from "./constants";
 import polka from "polka";
 import { ExtensionState } from "./ExtensionState";
+import { join } from "path";
+import fs from "fs";
 
-export const authenticate = (): Thenable<boolean> => {
+export const authenticate = (uri: vscode.Uri): Thenable<boolean> => {
   return new Promise<boolean>((resolve, _) => {
     const app = polka();
 
     app.get("/auth/:authData", async (req: any, res: any) => {
       const { authData } = req.params;
       if (!authData) {
-        res.end("<h1>Something went wrong during authentification</h1>");
+        res.writeHead(302, {
+          Location: `${apiBaseUrl}/auth-finished?error=true`,
+        });
+        res.end();
         return;
       }
 
@@ -25,9 +30,10 @@ export const authenticate = (): Thenable<boolean> => {
         spotifyRefreshToken
       );
 
-      res.end(
-        "<h1>Authentification was successful, you can close this now</h1>"
-      );
+      res.writeHead(302, {
+        Location: `${apiBaseUrl}/auth-finished`,
+      });
+      res.end();
 
       app.server?.close();
       resolve(true);

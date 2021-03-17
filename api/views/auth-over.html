@@ -1,0 +1,36 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="/public/vscode_tunes_logo.png">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Oswald&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/public/styles.css">
+  <script src="https://unpkg.com/feather-icons"></script>
+  <title>VSCode tunes</title>
+</head>
+<body>
+  <img class="site-bg-image" src="/public/vscode_tunes_logo.png"/>
+  <div class="main-container">
+    <h1 id="success-msg" style="display: none;">Authentication success, you can now close this.</h1>
+    <h1 id="error-msg" style="display: none;">An error occured, you can try again inside VSCode.</h1>
+    <a class="go-home-link" href="/">Go to the home page</a>
+    <p class="copyright">&copy; Copyright 2021-<span id="currentYear"></span>, TheMasterCado</p>
+  </div>
+  <!-- js -->
+  <script>
+    feather.replace();
+
+    document.getElementById('currentYear').innerHTML = (new Date()).getFullYear();
+
+    var isError = location.search.split('error=')[1] ? location.search.split('error=')[1] : false;
+    if (isError) {
+      document.getElementById('error-msg').style.display = 'block';
+    } else {
+      document.getElementById('success-msg').style.display = 'block';
+    }
+  </script>
+</body>
+</html>

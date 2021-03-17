@@ -34,7 +34,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     vscode.commands.registerCommand("vscode-tunes.authenticate", async () => {
-      await authenticate();
+      await authenticate(context.extensionUri);
       await sidebarProvider.sendAccessTokenToView();
     })
   );
