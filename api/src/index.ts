@@ -323,8 +323,8 @@ const main = async () => {
     res.sendFile(join(__dirname, "../views/index.html"));
   });
 
-  app.get("/auth-over", (req, res) => {
-    res.sendFile(join(__dirname, "../views/auth-over.html"));
+  app.get("/auth-finished", (req, res) => {
+    res.sendFile(join(__dirname, "../views/auth-finished.html"));
   });
 
   //ws
