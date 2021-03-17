@@ -299,10 +299,13 @@ const main = async () => {
     }
   });
 
-  // .well-known
-  app.get("/.well-known/:file", (req, res) => {
+  // .well-known/acme-challenge
+  app.get("/.well-known/acme-challenge/:file", (req, res) => {
     const filename = req.params.file.replace(new RegExp("\\.\\."), "");
-    const filepath = join(__dirname, `../.well-known/${filename}`);
+    const filepath = join(
+      __dirname,
+      `../.well-known/acme-challenge/${filename}`
+    );
     try {
       if (existsSync(filepath)) {
         res.sendFile(filepath);
